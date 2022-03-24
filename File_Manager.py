@@ -1,4 +1,3 @@
-
 class FileManager:
 
     def load_data(self, path: str):
