@@ -21,10 +21,14 @@ centroids_entry: Entry = Entry(root, borderwidth=5, font=('helvetica', 14, 'bold
                                textvariable=centroids)
 
 
-def start_clustering():
+def start_clustering() -> None:
+    """
+    zavolá fuknciu na zhlukovanie a zobrazí výsledky
+    :rtype: None
+    """
     try:
         clu = Clustering()
-        labels, centers = clu.k_means_clustering(csv_file_path.get(), centroids_entry.get())
+        labels, centers = clu.k_means_clustering(csv_file_path.get(), centroids.get())
 
         top_200 = Toplevel()
         top_200.title('Clusters and centers')
@@ -44,11 +48,22 @@ def start_clustering():
 
         s.config(command=t.yview)
         t.config(yscrollcommand=s.set)
+
+    except ValueError as err:
+        messagebox.showinfo('Error', 'Zadaj súradnice stredov alebo Súbor nie je v spravnom formáte - pozri test.csv \n' + str(err))
+    except FileNotFoundError as err:
+        messagebox.showinfo('Error', 'Súbor sa nenašiel \n' + str(err))
+    except IndexError as err:
+        messagebox.showinfo('Error', 'Stredov je viac ako bodov alebo index bodu > počet bodov \n' + str(err))
     except Exception as err:
-        print(err)
+        messagebox.showinfo('Error', ' -\(o,o)/-  \n' + str(err))
 
 
-def get_csv_file():
+def get_csv_file() -> None:
+    """
+    otvorí prehladávanie preičinkov na nájdene csv súboru
+    :rtype: None
+    """
     root.filename = filedialog.askopenfilename(
         initialdir="",
         title="Select a file",
