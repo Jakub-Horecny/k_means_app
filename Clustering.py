@@ -22,7 +22,11 @@ class Clustering:
 
         centroids_list: list = []
         for cent in centroids_id:
-            centroids_list.append(data[cent])
+            # ak by dal ako vstup hodnoty 0 a menej
+            if (cent - 1) < 0:
+                raise IndexError
+
+            centroids_list.append(data[cent - 1])
 
         data_np = np.array(data)
         centroids_list_np = np.array(centroids_list)
@@ -31,8 +35,11 @@ class Clustering:
         # print(kmeans.labels_)
         # kmeans.predict([[1,1], [2,1]])
         # print(kmeans.cluster_centers_)
+        temp_labels = kmeans.labels_.tolist()
+        for i in range(len(temp_labels)):
+            temp_labels[i] = temp_labels[i] + 1
 
-        return kmeans.labels_.tolist(), kmeans.cluster_centers_.tolist()
+        return temp_labels, kmeans.cluster_centers_.tolist()
 
     def adjust_centroids(self, centroids: str) -> list:
         """
