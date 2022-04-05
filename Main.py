@@ -1,4 +1,4 @@
-from Clustering import Clustering
+"""from Clustering import Clustering
 clu = Clustering()
 
 x = [[1, 1], [2, 1], [4, 3],
@@ -13,4 +13,16 @@ labels, centers = clu.k_means_clustering(path, cc)
 labels = labels.tolist()
 centers = centers.tolist()
 print(labels)
-print(centers)
+print(centers)"""
+
+from File_Manager import FileManager
+from Bayes import Bayes
+path: str = "cv6.xlsx"
+"""manager = FileManager()
+res: list = manager.load_data_xlsx(path)
+
+for i in res:
+    print(i)"""
+
+bayes = Bayes()
+bayes.count_bayes(path)
