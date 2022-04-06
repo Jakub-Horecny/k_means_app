@@ -17,7 +17,7 @@ print(centers)"""
 
 from File_Manager import FileManager
 from Bayes import Bayes
-path: str = "cv6.xlsx"
+path: str = "bayes2.xlsx"
 """manager = FileManager()
 res: list = manager.load_data_xlsx(path)
 

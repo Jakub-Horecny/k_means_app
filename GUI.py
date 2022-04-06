@@ -5,6 +5,7 @@ from tkinter import filedialog, messagebox
 from PIL import ImageTk, Image
 
 from Clustering import Clustering
+from Bayes import Bayes
 
 root = Tk()
 root.title("DaZZ Solver App")
@@ -17,10 +18,9 @@ logo_image_label = Label(root, image=logo_image)
 csv_file_path: StringVar = StringVar()
 centroids: StringVar = StringVar()
 
-
 method_type_list: list = ["K-means", "Bayes"]
 used_method: StringVar = StringVar()
-used_method.set(method_type_list[0])
+used_method.set(method_type_list[1])
 method_label = Label(root, text='Výber metódy', font=('helvetica', 11, 'bold'))
 
 
@@ -54,12 +54,12 @@ def k_means_method_window() -> None:
                                    font=('helvetica', 14, 'bold'))
     centroids_entry: Entry = Entry(k_means, borderwidth=5, font=('helvetica', 14, 'bold'),
                                    textvariable=centroids)
-    csv_file_button = Button(k_means, text=".csv súbor", command=get_csv_file,
+    csv_file_button = Button(k_means, text=".csv súbor", command=get_file,
                              bg='green', fg='white', font=('helvetica', 14, 'bold'),
                              padx=20, pady=10, borderwidth=5)
     csv_file_start = Button(k_means, text="start", command=k_means_method,
-                             bg='green', fg='white', font=('helvetica', 14, 'bold'),
-                             padx=20, pady=10, borderwidth=5)
+                            bg='green', fg='white', font=('helvetica', 14, 'bold'),
+                            padx=20, pady=10, borderwidth=5)
     csv_file_label.pack(anchor="center", pady=5)
     csv_file_button.pack(anchor="center", pady=5)
     centroids_label.pack(anchor="center", pady=5)
@@ -108,10 +108,65 @@ def k_means_method() -> None:
 
 
 def bayes_method_window() -> None:
-    messagebox.showinfo('TO DO', ' -\(o,o)/-  \n TO DO')
+    # messagebox.showinfo('TO DO', ' -\(o,o)/-  \n TO DO')
+    bayes = Toplevel()
+    bayes.title('Bayes Method')
+    bayes.geometry("400x400")
+    xlsx_file_label: Label = Label(bayes,
+                                   text='excel súbor (meno.xlsx) \n musí byť rovnaký ako vzor - bayes.xlsx \n '
+                                        'na počte nezávislých atríbútov nezáleží \n '
+                                        '\n na počte hodnôt nezáleží \n všetko musí byť na hárku 1',
+                                   font=('helvetica', 14, 'bold'))
+    csv_file_button = Button(bayes, text=".xlsx súbor", command=get_file,
+                             bg='green', fg='white', font=('helvetica', 14, 'bold'),
+                             padx=20, pady=10, borderwidth=5)
+    csv_file_start = Button(bayes, text="start", command=bayes_method,
+                            bg='green', fg='white', font=('helvetica', 14, 'bold'),
+                            padx=20, pady=10, borderwidth=5)
+    xlsx_file_label.pack(anchor="center", pady=5)
+    csv_file_button.pack(anchor="center", pady=5)
+    csv_file_start.pack(anchor="center", pady=5)
 
 
-def get_csv_file() -> None:
+def bayes_method() -> None:
+    try:
+        bayes = Bayes()
+        variable_list, citatel, norm, counts, counts_norm = bayes.count_bayes(csv_file_path.get())
+
+        bayes_top = Toplevel()
+        bayes_top.title('Čitateľ a Normalizácia')
+        bayes_top.geometry(print_geometry)
+        t = Text(bayes_top)
+        s = Scrollbar(bayes_top)
+
+        t.insert(END, "Ling   |   Čitateľ   |   Normalizácia" + '\n')
+        t.insert(END, "-----------------------------------------" + '\n')
+        for v, c, n in zip(variable_list, citatel, norm):
+            t.insert(END, str(v) + ' | ' + str(c) + ' | ' + str(n) + '\n')
+        t.insert(END, '\n')
+        t.insert(END, "Keď násobým výsledok aj početnosťou výskitu" + '\n')
+        t.insert(END, "Napr. koľko krát je low, hight z 10" + '\n')
+        t.insert(END, '\n')
+        t.insert(END, "Ling   |   Čitateľ   |   Normalizácia" + '\n')
+        t.insert(END, "-----------------------------------------" + '\n')
+        for v, c, n in zip(variable_list, counts, counts_norm):
+            t.insert(END, str(v) + ' | ' + str(c) + ' | ' + str(n) + '\n')
+
+        s.pack(side=RIGHT, fill=Y)
+        t.pack(side=LEFT, fill=Y)
+
+        s.config(command=t.yview)
+        t.config(yscrollcommand=s.set)
+
+    except FileNotFoundError as err:
+        messagebox.showinfo('Error', 'Súbor sa nenašiel \n' + str(err))
+    except IndexError as err:
+        messagebox.showinfo('Error', 'Tabuľka je zle \n' + str(err))
+    except Exception as err:
+        messagebox.showinfo('Error', ' -\(o,o)/-  \n' + str(err))
+
+
+def get_file() -> None:
     """
     otvorí prehladávanie preičinkov na nájdene csv súboru
     :rtype: None
