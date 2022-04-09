@@ -12,13 +12,20 @@ root.title("DaZZ Solver App")
 root.geometry("500x550")
 
 print_geometry = "400x500"
-logo_image = ImageTk.PhotoImage(Image.open("logo.jpg"))  # 400x200
-logo_image_label = Label(root, image=logo_image)
+#logo_image = ImageTk.PhotoImage(Image.open("logo.jpg"))  # 400x200
+#logo_image_label = Label(root, image=logo_image)
 
+loga_label = Label(root, text='************************** \n NEPODLIEHAJTE \n PANIKE! \n **************************',
+                   font=('helvetica', 28, 'bold'))
+
+# all
 csv_file_path: StringVar = StringVar()
+# k-means
 centroids: StringVar = StringVar()
+# bayes
+non_linguistic_variable: BooleanVar = BooleanVar()
 
-method_type_list: list = ["K-means", "Bayes"]
+method_type_list: list = ["K-means", "Bayes", "K-cestný rozhodovací strom"]
 used_method: StringVar = StringVar()
 used_method.set(method_type_list[1])
 method_label = Label(root, text='Výber metódy', font=('helvetica', 11, 'bold'))
@@ -54,7 +61,7 @@ def k_means_method_window() -> None:
                                    font=('helvetica', 14, 'bold'))
     centroids_entry: Entry = Entry(k_means, borderwidth=5, font=('helvetica', 14, 'bold'),
                                    textvariable=centroids)
-    csv_file_button = Button(k_means, text=".csv súbor", command=get_file,
+    csv_file_button = Button(k_means, text=".csv súbor", command=get_csv_file,
                              bg='green', fg='white', font=('helvetica', 14, 'bold'),
                              padx=20, pady=10, borderwidth=5)
     csv_file_start = Button(k_means, text="start", command=k_means_method,
@@ -104,20 +111,24 @@ def k_means_method() -> None:
     except IndexError as err:
         messagebox.showinfo('Error', 'Stredov je viac ako bodov alebo index bodu > počet bodov \n' + str(err))
     except Exception as err:
-        messagebox.showinfo('Error', ' -\(o,o)/-  \n' + str(err))
+        messagebox.showinfo('Error', ' ¯\_(o_o)_/¯  \n' + str(err))
 
 
 def bayes_method_window() -> None:
-    # messagebox.showinfo('TO DO', ' -\(o,o)/-  \n TO DO')
+    # messagebox.showinfo('TO DO', ' ¯\_(o_o)_/¯  \n TO DO')
     bayes = Toplevel()
     bayes.title('Bayes Method')
     bayes.geometry("400x400")
     xlsx_file_label: Label = Label(bayes,
-                                   text='excel súbor (meno.xlsx) \n musí byť rovnaký ako vzor - bayes.xlsx \n '
+                                   text='excel súbor (meno.xlsx) \n '
+                                        'musí byť rovnaký ako vzor - bayes.xlsx \n '
                                         'na počte nezávislých atríbútov nezáleží \n '
-                                        '\n na počte hodnôt nezáleží \n všetko musí byť na hárku 1',
+                                        'na počte hodnôt nezáleží \n '
+                                        'všetko musí byť na hárku 1',
                                    font=('helvetica', 14, 'bold'))
-    csv_file_button = Button(bayes, text=".xlsx súbor", command=get_file,
+    min_priority_check_button = Checkbutton(bayes, text='Nelingvistické premenné (čísla)',
+                                            font=('helvetica', 11, 'bold'), variable=non_linguistic_variable)
+    csv_file_button = Button(bayes, text=".xlsx súbor", command=get_xlsx_file,
                              bg='green', fg='white', font=('helvetica', 14, 'bold'),
                              padx=20, pady=10, borderwidth=5)
     csv_file_start = Button(bayes, text="start", command=bayes_method,
@@ -125,48 +136,55 @@ def bayes_method_window() -> None:
                             padx=20, pady=10, borderwidth=5)
     xlsx_file_label.pack(anchor="center", pady=5)
     csv_file_button.pack(anchor="center", pady=5)
+    min_priority_check_button.pack(anchor="center", pady=5)
     csv_file_start.pack(anchor="center", pady=5)
 
 
 def bayes_method() -> None:
     try:
         bayes = Bayes()
-        variable_list, citatel, norm, counts, counts_norm = bayes.count_bayes(csv_file_path.get())
 
-        bayes_top = Toplevel()
-        bayes_top.title('Čitateľ a Normalizácia')
-        bayes_top.geometry(print_geometry)
-        t = Text(bayes_top)
-        s = Scrollbar(bayes_top)
+        if non_linguistic_variable.get():
+            # počítanie z nelingvistickými hodnotami
+            messagebox.showinfo('TO DO', ' ¯\_(o_o)_/¯  \n TO DO')
+        else:
+            variable_list, citatel, norm, counts, counts_norm = bayes.count_bayes(csv_file_path.get())
 
-        t.insert(END, "Ling   |   Čitateľ   |   Normalizácia" + '\n')
-        t.insert(END, "-----------------------------------------" + '\n')
-        for v, c, n in zip(variable_list, citatel, norm):
-            t.insert(END, str(v) + ' | ' + str(c) + ' | ' + str(n) + '\n')
-        t.insert(END, '\n')
-        t.insert(END, "Keď násobým výsledok aj početnosťou výskitu" + '\n')
-        t.insert(END, "Napr. koľko krát je low, hight z 10" + '\n')
-        t.insert(END, '\n')
-        t.insert(END, "Ling   |   Čitateľ   |   Normalizácia" + '\n')
-        t.insert(END, "-----------------------------------------" + '\n')
-        for v, c, n in zip(variable_list, counts, counts_norm):
-            t.insert(END, str(v) + ' | ' + str(c) + ' | ' + str(n) + '\n')
+            bayes_top = Toplevel()
+            bayes_top.title('Čitateľ a Normalizácia')
+            bayes_top.geometry(print_geometry)
+            t = Text(bayes_top)
+            s = Scrollbar(bayes_top)
 
-        s.pack(side=RIGHT, fill=Y)
-        t.pack(side=LEFT, fill=Y)
+            t.insert(END, "Ling   |   Čitateľ   |   Normalizácia" + '\n')
+            t.insert(END, "-----------------------------------------" + '\n')
+            for v, c, n in zip(variable_list, citatel, norm):
+                t.insert(END, str(v) + ' | ' + str(c) + ' | ' + str(n) + '\n')
+            t.insert(END, '\n')
+            t.insert(END, "Keď násobým výsledok aj početnosťou výskitu" + '\n')
+            t.insert(END, "Napr. koľko krát je low, hight z 10" + '\n')
+            t.insert(END, '\n')
+            t.insert(END, "Ling   |   Čitateľ   |   Normalizácia" + '\n')
+            t.insert(END, "-----------------------------------------" + '\n')
+            for v, c, n in zip(variable_list, counts, counts_norm):
+                t.insert(END, str(v) + ' | ' + str(c) + ' | ' + str(n) + '\n')
 
-        s.config(command=t.yview)
-        t.config(yscrollcommand=s.set)
+            s.pack(side=RIGHT, fill=Y)
+            t.pack(side=LEFT, fill=Y)
+
+            s.config(command=t.yview)
+            t.config(yscrollcommand=s.set)
 
     except FileNotFoundError as err:
         messagebox.showinfo('Error', 'Súbor sa nenašiel \n' + str(err))
     except IndexError as err:
         messagebox.showinfo('Error', 'Tabuľka je zle \n' + str(err))
     except Exception as err:
-        messagebox.showinfo('Error', ' -\(o,o)/-  \n' + str(err))
+        messagebox.showinfo('Error', ' ¯\_(o_o)_/¯  \n' + str(err))
 
 
-def get_file() -> None:
+# prerobiť aby to bola jedna funkcia
+def get_csv_file() -> None:
     """
     otvorí prehladávanie preičinkov na nájdene csv súboru
     :rtype: None
@@ -180,17 +198,32 @@ def get_file() -> None:
     t = Label(root, text=root.filename).pack(anchor="center")
 
 
+def get_xlsx_file() -> None:
+    """
+    otvorí prehladávanie preičinkov na nájdene xlsx súboru
+    :rtype: None
+    """
+    root.filename = filedialog.askopenfilename(
+        initialdir="",
+        title="Select a file",
+        filetypes=(("xlsx files", "*.xlsx"),
+                   ("all files", "*.*")))
+    csv_file_path.set(root.filename)
+    t = Label(root, text=root.filename).pack(anchor="center")
+
+
 select_button = Button(root, text="Start", command=start_clustering,
                        bg='green', fg='white', font=('helvetica', 14, 'bold'),
                        padx=20, pady=10, borderwidth=5)
 
-logo_image_label.pack(anchor="center", pady=5)
+#logo_image_label.pack(anchor="center", pady=5)
+loga_label.pack(anchor="center", pady=30)
 
 method_label.pack(anchor="center", pady=5)
 method_drop_down_menu = OptionMenu(root, used_method, *method_type_list)
 method_drop_down_menu.pack(anchor="center", pady=5)
 method_drop_down_menu.config(font=('helvetica', 12, 'bold'), bg='green', fg='white',
-                             activebackground='green', activeforeground='black', width=13)
+                             activebackground='green', activeforeground='black', width=27)
 
 select_button.pack(anchor="center", pady=30, padx=5)
 
