@@ -1,5 +1,10 @@
+from typing import Tuple
+
 from sklearn.cluster import KMeans
 import numpy as np
+
+from scipy.cluster.hierarchy import dendrogram, linkage
+
 
 from File_Manager import FileManager
 
@@ -8,6 +13,36 @@ class Clustering:
 
     def __init__(self):
         self.file_manager = FileManager()
+
+    def hierarchical_clustering(self, path: str, clustering_type: bool) -> Tuple[list, dict]:
+        """
+        vykoná hierarchické zhlukvoanie
+        :rtype: Tuple[list, dict]
+        :param path: cesta k súboru
+        :param clustering_type: o aký typ zhlukovania ide True -> single / False -> complete
+        :return: výsledky, dendogram
+        """
+        data = self.file_manager.load_data(path)
+        ascii_letters = list(range(65, 91))
+
+        if len(data) <= len(ascii_letters):
+            letters = ascii_letters[:len(data)]
+            for i, let in enumerate(letters):
+                letters[i] = chr(let)
+        else:
+            letters = list(range(1, len(data)))
+
+        # typ zhlukovania
+        if clustering_type:
+            hierarchical = linkage(data, 'single', optimal_ordering=True)
+        else:
+            hierarchical = linkage(data, 'complete', optimal_ordering=True)
+
+        # fig = plt.figure(figsize=(25, 10))
+        dn: dict = dendrogram(hierarchical, labels=letters)
+        print(hierarchical[:, 2])
+        return hierarchical.tolist(), dn
+        #plt.show()
 
     def k_means_clustering(self, path: str, centroids: str) -> tuple:
         """
@@ -18,7 +53,7 @@ class Clustering:
         :rtype: tuple
         """
         data: list = self.file_manager.load_data(path)
-        centroids_id: list = self.adjust_centroids(centroids)
+        centroids_id: list = self.__adjust_centroids(centroids)
 
         centroids_list: list = []
         for cent in centroids_id:
@@ -41,7 +76,7 @@ class Clustering:
 
         return temp_labels, kmeans.cluster_centers_.tolist()
 
-    def adjust_centroids(self, centroids: str) -> list:
+    def __adjust_centroids(self, centroids: str) -> list:
         """
         upraví input od používateľa
         :param centroids:

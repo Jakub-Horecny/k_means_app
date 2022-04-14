@@ -4,6 +4,8 @@ from tkinter import filedialog, messagebox
 
 from PIL import ImageTk, Image
 
+from matplotlib import pyplot as plt
+
 from Clustering import Clustering
 from Bayes import Bayes
 
@@ -12,10 +14,10 @@ root.title("DaZZ Solver App")
 root.geometry("500x550")
 
 print_geometry = "400x500"
-#logo_image = ImageTk.PhotoImage(Image.open("logo.jpg"))  # 400x200
-#logo_image_label = Label(root, image=logo_image)
+# logo_image = ImageTk.PhotoImage(Image.open("logo.jpg"))  # 400x200
+# logo_image_label = Label(root, image=logo_image)
 
-loga_label = Label(root, text='************************** \n NEPODLIEHAJTE \n PANIKE! \n **************************',
+logo_label = Label(root, text='************************** \n NEPODLIEHAJTE \n PANIKE! \n **************************',
                    font=('helvetica', 28, 'bold'))
 
 # all
@@ -24,13 +26,19 @@ csv_file_path: StringVar = StringVar()
 centroids: StringVar = StringVar()
 # bayes
 non_linguistic_variable: BooleanVar = BooleanVar()
+# pre hierarchical clustering
+hierarchical_clustering_list: list = ["Single linkage", "Complete linkage"]
+used_method_h: StringVar = StringVar()
+used_method_h.set(hierarchical_clustering_list[0])
 
-method_type_list: list = ["K-means", "Bayes", "K-cestný rozhodovací strom"]
+# pre hlavné menu
+method_type_list: list = ["Hierarchické zhlukovanie", "K-means", "Bayes", "K-cestný rozhodovací strom"]
 used_method: StringVar = StringVar()
-used_method.set(method_type_list[1])
-method_label = Label(root, text='Výber metódy', font=('helvetica', 11, 'bold'))
+used_method.set(method_type_list[0])
+method_label: Label = Label(root, text='Výber metódy', font=('helvetica', 11, 'bold'))
 
 
+# vypnutie GUI
 def on_exit() -> None:
     """
     vypnutie GUI
@@ -45,12 +53,19 @@ root.protocol('WM_DELETE_WINDOW', on_exit)
 
 def start_clustering() -> None:
     if used_method.get() == method_type_list[0]:
-        k_means_method_window()
+        hierarchical_clustering_window()
     elif used_method.get() == method_type_list[1]:
+        k_means_method_window()
+    elif used_method.get() == method_type_list[2]:
         bayes_method_window()
+    elif used_method.get() == method_type_list[3]:
+        messagebox.showinfo('TO DO', ' ¯\_(o_o)_/¯  \n TO DO')
 
 
 def k_means_method_window() -> None:
+    """
+    GUI okno pre k-means
+    """
     k_means = Toplevel()
     k_means.title('K-Means')
     k_means.geometry("400x400")
@@ -115,7 +130,10 @@ def k_means_method() -> None:
 
 
 def bayes_method_window() -> None:
-    # messagebox.showinfo('TO DO', ' ¯\_(o_o)_/¯  \n TO DO')
+    """
+    GUI pre bayes method
+    :rtype: None
+    """
     bayes = Toplevel()
     bayes.title('Bayes Method')
     bayes.geometry("400x400")
@@ -183,6 +201,77 @@ def bayes_method() -> None:
         messagebox.showinfo('Error', ' ¯\_(o_o)_/¯  \n' + str(err))
 
 
+def hierarchical_clustering_window() -> None:
+    """
+    GUI okno pre hierarchical clustering
+    """
+    hierarchical = Toplevel()
+    hierarchical.title('Hierarchical clustering')
+    hierarchical.geometry("400x400")
+
+    csv_file_label: Label = Label(hierarchical, text='.csv alebo .txt súbor \n (variables x points) \n vzor v test.csv',
+                                  font=('helvetica', 14, 'bold'))
+    csv_file_button = Button(hierarchical, text=".csv/txt súbor", command=get_csv_file,
+                             bg='green', fg='white', font=('helvetica', 14, 'bold'),
+                             padx=20, pady=10, borderwidth=5)
+
+    method_label_h: Label = Label(hierarchical, text='Výber metódy',
+                                  font=('helvetica', 14, 'bold'))
+
+    method_drop_down_menu_h = OptionMenu(hierarchical, used_method_h, *hierarchical_clustering_list)
+
+    start_button = Button(hierarchical, text="start", command=hierarchical_clustering,
+                          bg='green', fg='white', font=('helvetica', 14, 'bold'),
+                          padx=20, pady=10, borderwidth=5)
+
+    csv_file_label.pack(anchor="center", pady=5)
+    csv_file_button.pack(anchor="center", pady=5)
+    method_label_h.pack(anchor="center", pady=5)
+    method_drop_down_menu_h.pack(anchor="center", pady=5)
+    method_drop_down_menu_h.config(font=('helvetica', 12, 'bold'), bg='green', fg='white',
+                                   activebackground='green', activeforeground='black', width=27)
+    start_button.pack(anchor="center", pady=5)
+
+
+def hierarchical_clustering() -> None:
+    """
+    zavolá fuknciu na zhlukovanie a zobrazí výsledky/dendogram
+    :rtype: None
+    """
+    try:
+        c = Clustering()
+        if used_method_h.get() == hierarchical_clustering_list[0]:
+            hierarchical, dn = c.hierarchical_clustering(csv_file_path.get(), True)
+        else:
+            hierarchical, dn = c.hierarchical_clustering(csv_file_path.get(), False)
+
+        top_h = Toplevel()
+        top_h.title('Hierarchical clustering')
+        top_h.geometry(print_geometry)
+        t = Text(top_h)
+        s = Scrollbar(top_h)
+
+        t.insert(END, "Priradenie 0 - A, 1 - B..." + '\n')
+        t.insert(END, "--------------------------------------" + '\n')
+        for h in hierarchical:
+            t.insert(END, str(h[0]) + ' - ' + str(h[1]) + ' - ' + str(h[2]) + '\n')
+        t.insert(END, "--------------------------------------" + '\n')
+
+        s.pack(side=RIGHT, fill=Y)
+        t.pack(side=LEFT, fill=Y)
+
+        s.config(command=t.yview)
+        t.config(yscrollcommand=s.set)
+        plt.show()
+
+    except FileNotFoundError as err:
+        messagebox.showinfo('Error', 'Súbor sa nenašiel \n' + str(err))
+    except IndexError as err:
+        messagebox.showinfo('Error', 'Tabuľka je zle \n' + str(err))
+    except Exception as err:
+        messagebox.showinfo('Error', ' ¯\_(o_o)_/¯  \n' + str(err))
+
+
 # prerobiť aby to bola jedna funkcia
 def get_csv_file() -> None:
     """
@@ -212,12 +301,13 @@ def get_xlsx_file() -> None:
     t = Label(root, text=root.filename).pack(anchor="center")
 
 
+# #########################################################################
 select_button = Button(root, text="Start", command=start_clustering,
                        bg='green', fg='white', font=('helvetica', 14, 'bold'),
                        padx=20, pady=10, borderwidth=5)
 
-#logo_image_label.pack(anchor="center", pady=5)
-loga_label.pack(anchor="center", pady=30)
+# logo_image_label.pack(anchor="center", pady=5)
+logo_label.pack(anchor="center", pady=30)
 
 method_label.pack(anchor="center", pady=5)
 method_drop_down_menu = OptionMenu(root, used_method, *method_type_list)
