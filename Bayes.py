@@ -116,7 +116,6 @@ class Bayes:
             counts_result[i] = citatel[i] * counts[i]
         #print(citatel)
 
-
         counts_norm: list = [1] * len(linguistic)
         norm: list = [1] * len(linguistic)
         for i, (ci, res) in enumerate(zip(citatel, counts_result)):

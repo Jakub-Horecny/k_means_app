@@ -10,7 +10,7 @@ from Clustering import Clustering
 from Bayes import Bayes
 
 root = Tk()
-root.title("DaZZ Solver App")
+root.title("DaZZ Solver")
 root.geometry("500x550")
 
 print_geometry = "400x500"
@@ -20,6 +20,8 @@ print_geometry = "400x500"
 logo_label = Label(root, text='************************** \n NEPODLIEHAJTE \n PANIKE! \n **************************',
                    font=('helvetica', 28, 'bold'))
 
+version_label = Label(root, text='Verzia 0.0.3',
+                   font=('helvetica', 8, 'bold'))
 # all
 csv_file_path: StringVar = StringVar()
 # k-means
@@ -241,9 +243,9 @@ def hierarchical_clustering() -> None:
     try:
         c = Clustering()
         if used_method_h.get() == hierarchical_clustering_list[0]:
-            hierarchical, dn = c.hierarchical_clustering(csv_file_path.get(), True)
+            hierarchical, dn, points_1, points_2 = c.hierarchical_clustering(csv_file_path.get(), True)
         else:
-            hierarchical, dn = c.hierarchical_clustering(csv_file_path.get(), False)
+            hierarchical, dn, points_1, points_2 = c.hierarchical_clustering(csv_file_path.get(), False)
 
         top_h = Toplevel()
         top_h.title('Hierarchical clustering')
@@ -251,10 +253,11 @@ def hierarchical_clustering() -> None:
         t = Text(top_h)
         s = Scrollbar(top_h)
 
-        t.insert(END, "Priradenie 0 - A, 1 - B..." + '\n')
+        #t.insert(END, "Priradenie 0 - A, 1 - B..." + '\n')
         t.insert(END, "--------------------------------------" + '\n')
-        for h in hierarchical:
-            t.insert(END, str(h[0]) + ' - ' + str(h[1]) + ' - ' + str(h[2]) + '\n')
+        t.insert(END, "Spojené body  |  Vzdialenosť " + '\n')
+        for h, p1, p2 in zip(hierarchical, points_1, points_2):
+            t.insert(END, str(p1) + '-' + str(p2) + ' | ' + str(h) + '\n')
         t.insert(END, "--------------------------------------" + '\n')
 
         s.pack(side=RIGHT, fill=Y)
@@ -316,5 +319,6 @@ method_drop_down_menu.config(font=('helvetica', 12, 'bold'), bg='green', fg='whi
                              activebackground='green', activeforeground='black', width=27)
 
 select_button.pack(anchor="center", pady=30, padx=5)
+version_label.pack(anchor="se", pady=15, padx=30)
 
 root.mainloop()

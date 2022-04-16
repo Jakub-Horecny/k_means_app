@@ -55,26 +55,37 @@ from matplotlib import pyplot as plt
 from Clustering import Clustering
 
 c = Clustering()
-hierarchical, dn = c.hierarchical_clustering("test2.csv", False)
+hierarchical, dn, l_1, l_2 = c.hierarchical_clustering("files/test2.csv", False)
 # print(hierarchical[:,2])
-print(len(hierarchical)) # ok
-print(max(hierarchical[:, 0:1]))
+print((hierarchical)) # ok
+#print(max(hierarchical[:, 0:1]))
 
 col1 = hierarchical[:, 0].tolist()
 col2 = hierarchical[:, 1].tolist()
 
-print(col1)
-print(col2)
+"""print(col1)
+print(col2)"""
 
-ascii_letters = 65
-letters: list = list(range(ascii_letters, ascii_letters + len(hierarchical)))
+"""ascii_letters = 65
+letters: list = list(range(ascii_letters, ascii_letters + 10))
 
 for i, let in enumerate(letters):
     letters[i] = chr(let)
 
-for i in range(len(hierarchical)):
-    letters.append(chr(int(col1[i]) + ascii_letters) + chr(int(col2[i]) + ascii_letters))
+l_1: list = []
+l_2: list = []
 
+for i, (c_1, c_2) in enumerate(zip(col1, col2)):
+    t = letters[int(c_1)]
+    tt = letters[int(c_2)]
+    l_1.append(t)
+    l_2.append(tt)
+    letters.append(str(t)+str(tt))"""
+
+for i, (c_1, c_2) in enumerate(zip(l_1, l_2)):
+    print(str(c_1) + " - " + str(c_2))
+
+#print(letters)
 s = max(hierarchical[:, 1])
 temp_l = [""] * int(s)
 print(temp_l)

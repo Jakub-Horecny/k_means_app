@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Tuple, Any
 
 from sklearn.cluster import KMeans
 import numpy as np
@@ -14,23 +14,23 @@ class Clustering:
     def __init__(self):
         self.file_manager = FileManager()
 
-    def hierarchical_clustering(self, path: str, clustering_type: bool) -> Tuple[list, dict]:
+    def hierarchical_clustering(self, path: str, clustering_type: bool) -> Tuple[Any, dict, Any, Any]:
         """
         vykoná hierarchické zhlukvoanie
-        :rtype: Tuple[list, dict]
+        :rtype: Tuple[Any, dict, Any, Any]
         :param path: cesta k súboru
         :param clustering_type: o aký typ zhlukovania ide True -> single / False -> complete
         :return: výsledky, dendogram
         """
         data = self.file_manager.load_data(path)
-        ascii_letters = list(range(65, 91))
+        ascii_letters = list(range(65, 91)) # velké písmená v ascii tabulke - A, B, C..
 
         if len(data) <= len(ascii_letters):
             letters = ascii_letters[:len(data)]
             for i, let in enumerate(letters):
-                letters[i] = chr(let)
+                letters[i] = chr(let)  # zmena cisla na písmeno
         else:
-            letters = list(range(1, len(data)))
+            letters = list(range(1, len(data)))  # ak je dát viac ako písmen, ostanú čísla
 
         # typ zhlukovania
         if clustering_type:
@@ -40,9 +40,33 @@ class Clustering:
 
         # fig = plt.figure(figsize=(25, 10))
         dn: dict = dendrogram(hierarchical, labels=letters)
-        print(hierarchical[:, 2])
-        return hierarchical.tolist(), dn
+
+        l_1, l_2 = self.__adjust_result(hierarchical, letters)
+
+        #print(hierarchical[:, 2])
+        return hierarchical[:, 2].tolist(), dn, l_1, l_2
+        #return hierarchical.tolist(), dn
         #plt.show()
+
+    def __adjust_result(self, hierarchical: object, letters: list) -> Tuple[list, list]:
+        """
+        zmení číselné hodnoty na písmená
+        :param hierarchical: výsledok zierarchického zhlukovania
+        :param letters: pole písmen
+        :return:
+        """
+        col1 = hierarchical[:, 0].tolist()
+        col2 = hierarchical[:, 1].tolist()
+        l_1: list = []
+        l_2: list = []
+
+        for (c_1, c_2) in zip(col1, col2):
+            letter_1 = letters[int(c_1)]
+            letter_2 = letters[int(c_2)]
+            l_1.append(letter_1)
+            l_2.append(letter_2)
+            letters.append(str(letter_1) + str(letter_2))
+        return l_1, l_2
 
     def k_means_clustering(self, path: str, centroids: str) -> tuple:
         """
