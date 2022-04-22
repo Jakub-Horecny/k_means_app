@@ -1,3 +1,4 @@
+import json
 import sys
 from tkinter import *
 from tkinter import filedialog, messagebox
@@ -8,6 +9,7 @@ from matplotlib import pyplot as plt
 
 from Clustering import Clustering
 from Bayes import Bayes
+from Tree import Tree
 
 root = Tk()
 root.title("DaZZ Solver")
@@ -20,18 +22,20 @@ print_geometry = "400x500"
 logo_label = Label(root, text='************************** \n NEPODLIEHAJTE \n PANIKE! \n **************************',
                    font=('helvetica', 28, 'bold'))
 
-version_label = Label(root, text='Verzia 0.0.3',
-                   font=('helvetica', 8, 'bold'))
+version_label = Label(root, text='Verzia 0.0.4',
+                      font=('helvetica', 8, 'bold'))
 # all
 csv_file_path: StringVar = StringVar()
 # k-means
 centroids: StringVar = StringVar()
 # bayes
 non_linguistic_variable: BooleanVar = BooleanVar()
-# pre hierarchical clustering
+# hierarchical clustering
 hierarchical_clustering_list: list = ["Single linkage", "Complete linkage"]
 used_method_h: StringVar = StringVar()
 used_method_h.set(hierarchical_clustering_list[0])
+# k way tree
+parameter_name: StringVar = StringVar()
 
 # pre hlavné menu
 method_type_list: list = ["Hierarchické zhlukovanie", "K-means", "Bayes", "K-cestný rozhodovací strom"]
@@ -61,7 +65,7 @@ def start_clustering() -> None:
     elif used_method.get() == method_type_list[2]:
         bayes_method_window()
     elif used_method.get() == method_type_list[3]:
-        messagebox.showinfo('TO DO', ' ¯\_(o_o)_/¯  \n TO DO')
+        k_way_tree_method_window()
 
 
 def k_means_method_window() -> None:
@@ -253,7 +257,7 @@ def hierarchical_clustering() -> None:
         t = Text(top_h)
         s = Scrollbar(top_h)
 
-        #t.insert(END, "Priradenie 0 - A, 1 - B..." + '\n')
+        # t.insert(END, "Priradenie 0 - A, 1 - B..." + '\n')
         t.insert(END, "--------------------------------------" + '\n')
         t.insert(END, "Spojené body  |  Vzdialenosť " + '\n')
         for h, p1, p2 in zip(hierarchical, points_1, points_2):
@@ -271,6 +275,83 @@ def hierarchical_clustering() -> None:
         messagebox.showinfo('Error', 'Súbor sa nenašiel \n' + str(err))
     except IndexError as err:
         messagebox.showinfo('Error', 'Tabuľka je zle \n' + str(err))
+    except Exception as err:
+        messagebox.showinfo('Error', ' ¯\_(o_o)_/¯  \n' + str(err))
+
+
+def k_way_tree_method_window() -> None:
+    """
+    GUI pre k way tree
+    :rtype: None
+    """
+    k_way_tree = Toplevel()
+    k_way_tree.title('K cestný strom')
+    k_way_tree.geometry("400x500")
+
+    csv_file_label: Label = Label(k_way_tree, text='.csv alebo .txt súbor \n (variables x points) \n vzor v test.csv',
+                                  font=('helvetica', 14, 'bold'))
+    parameter_label: Label = Label(k_way_tree, text='Zadaj najvýznamnejší parameter \n napr: Cancer, Sosovky...',
+                                   font=('helvetica', 14, 'bold'))
+    parameter_entry: Entry = Entry(k_way_tree, borderwidth=5, font=('helvetica', 14, 'bold'),
+                                   textvariable=parameter_name)
+
+    csv_file_button = Button(k_way_tree, text=".csv súbor", command=get_csv_file,
+                             bg='green', fg='white', font=('helvetica', 14, 'bold'),
+                             padx=20, pady=10, borderwidth=5)
+    k_way_tree_start = Button(k_way_tree, text="start", command=k_way_tree_method,
+                              bg='green', fg='white', font=('helvetica', 14, 'bold'),
+                              padx=20, pady=10, borderwidth=5)
+
+    csv_file_label.pack(anchor="center", pady=5)
+    csv_file_button.pack(anchor="center", pady=5)
+    parameter_label.pack(anchor="center", pady=5)
+    parameter_entry.pack(anchor="center", pady=5)
+    k_way_tree_start.pack(anchor="center", pady=5)
+
+
+def k_way_tree_method() -> None:
+    """
+    zavolá funkciu pre k way tree a zobrazí výsledky
+    :rtype: None
+    """
+    try:
+        tree: Tree = Tree()
+        tree_to_print, important, entropy, information = tree.start(csv_file_path.get(), parameter_name.get())
+
+        top_200 = Toplevel()
+        top_200.title('TREE')
+        top_200.geometry(print_geometry)
+        t = Text(top_200)
+        s = Scrollbar(top_200)
+
+        t.insert(END, "Najdôležitejšie parametre: " + '\n')
+        t.insert(END, "--------------------------------------" + '\n')
+        for i, (name, inf) in enumerate(zip(important, information)):
+            if i == 0:
+                t.insert(END, str(name) + " : " + str(inf) + '\n')
+            else:
+                t.insert(END, str(name) + '\n')
+        t.insert(END, "--------------------------------------" + '\n')
+        t.insert(END, "STROM:" + '\n')
+        t.insert(END, "--------------------------------------" + '\n')
+        t.insert(END, json.dumps(tree_to_print, indent=4))
+        t.insert(END, '\n')
+
+        t.insert(END, "--------------------------------------" + '\n')
+        for i in entropy:
+            t.insert(END, str(i) + '\n')
+        t.insert(END, "--------------------------------------" + '\n')
+
+        s.pack(side=RIGHT, fill=Y)
+        t.pack(side=LEFT, fill=Y)
+
+        s.config(command=t.yview)
+        t.config(yscrollcommand=s.set)
+
+    except FileNotFoundError as err:
+        messagebox.showinfo('Error', 'Súbor sa nenašiel \n' + str(err))
+    except KeyError as err:
+        messagebox.showinfo('Error', 'Zle zadaný vstupný parameter \n' + str(err))
     except Exception as err:
         messagebox.showinfo('Error', ' ¯\_(o_o)_/¯  \n' + str(err))
 

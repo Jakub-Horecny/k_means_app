@@ -1,0 +1,15 @@
+Tumor,History,Heredity,Age,Cancer
+confirmed,high,yes,younger,high
+confirmed,high,yes,elder,high
+no,high,yes,younger,low
+non confirmed,medium,yes,younger,low
+non confirmed,low,no,younger,low
+non confirmed,low,no,elder,high
+no,low,no,elder,low
+confirmed,medium,yes,younger,high
+confirmed,low,no,younger,low
+non confirmed,medium,no,younger,low
+confirmed,medium,no,elder,low
+no,medium,yes,elder,low
+no,high,no,younger,low
+non confirmed,medium,yes,elder,high

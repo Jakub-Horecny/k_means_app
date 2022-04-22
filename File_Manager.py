@@ -27,6 +27,9 @@ class FileManager:
 
     def load_data_xlsx(self, path: str) -> list:
         """
+
+        !!! Funguje iba pre xlrd == 1.2.0 !!!
+
         načíta dáta z xlsx súboru
         :rtype: list
         :param path: cesta k súboru
