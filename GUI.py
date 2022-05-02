@@ -16,13 +16,14 @@ root.title("DaZZ Solver")
 root.geometry("500x550")
 
 print_geometry = "400x500"
+print_geometry_bayes = "600x400"
 # logo_image = ImageTk.PhotoImage(Image.open("logo.jpg"))  # 400x200
 # logo_image_label = Label(root, image=logo_image)
 
 logo_label = Label(root, text='************************** \n NEPODLIEHAJTE \n PANIKE! \n **************************',
                    font=('helvetica', 28, 'bold'))
 
-version_label = Label(root, text='Verzia 0.0.4',
+version_label = Label(root, text='Verzia 0.0.5',
                       font=('helvetica', 8, 'bold'))
 # all
 csv_file_path: StringVar = StringVar()
@@ -168,18 +169,23 @@ def bayes_method() -> None:
     try:
         bayes = Bayes()
 
+        bayes_top = Toplevel()
+
+        bayes_top.geometry(print_geometry_bayes)
+        t = Text(bayes_top)
+        s = Scrollbar(bayes_top)
+
         if non_linguistic_variable.get():
-            # počítanie z nelingvistickými hodnotami
-            messagebox.showinfo('TO DO', ' ¯\_(o_o)_/¯  \n TO DO')
+            variable_list, norm_dist, result, norm = bayes.count_bayes_numeric(csv_file_path.get())
+            bayes_top.title('Bayes numeric')
+            t.insert(END, "Neling   |   Norm dist   |   Citatel   |   Normalizácia" + '\n')
+            t.insert(END, "-----------------------------------------" + '\n')
+            for v, nd, r, n in zip(variable_list, norm_dist, result, norm):
+                t.insert(END, str(v) + ' | ' + str(nd) + ' | ' + str(r) + ' | ' + str(n) + '\n')
+            t.insert(END, '\n')
         else:
             variable_list, citatel, norm, counts, counts_norm = bayes.count_bayes(csv_file_path.get())
-
-            bayes_top = Toplevel()
-            bayes_top.title('Čitateľ a Normalizácia')
-            bayes_top.geometry(print_geometry)
-            t = Text(bayes_top)
-            s = Scrollbar(bayes_top)
-
+            bayes_top.title('Bayes lingvistik')
             t.insert(END, "Ling   |   Čitateľ   |   Normalizácia" + '\n')
             t.insert(END, "-----------------------------------------" + '\n')
             for v, c, n in zip(variable_list, citatel, norm):
@@ -193,11 +199,11 @@ def bayes_method() -> None:
             for v, c, n in zip(variable_list, counts, counts_norm):
                 t.insert(END, str(v) + ' | ' + str(c) + ' | ' + str(n) + '\n')
 
-            s.pack(side=RIGHT, fill=Y)
-            t.pack(side=LEFT, fill=Y)
+        s.pack(side=RIGHT, fill=Y)
+        t.pack(side=LEFT, fill=Y)
 
-            s.config(command=t.yview)
-            t.config(yscrollcommand=s.set)
+        s.config(command=t.yview)
+        t.config(yscrollcommand=s.set)
 
     except FileNotFoundError as err:
         messagebox.showinfo('Error', 'Súbor sa nenašiel \n' + str(err))

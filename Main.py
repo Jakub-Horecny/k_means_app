@@ -91,3 +91,8 @@ temp_l = [""] * int(s)
 print(temp_l)
 plt.show()"""
 
+from Bayes import Bayes
+
+f = "files/bayes_num.xlsx"
+b = Bayes()
+b.count_bayes_numeric(f)
