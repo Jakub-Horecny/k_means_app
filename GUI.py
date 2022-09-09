@@ -39,7 +39,7 @@ used_method_h.set(hierarchical_clustering_list[0])
 parameter_name: StringVar = StringVar()
 
 # pre hlavné menu
-method_type_list: list = ["Hierarchické zhlukovanie", "K-means", "Bayes", "K-cestný rozhodovací strom"]
+method_type_list: list = ["Hierarchické zhlukovanie", "K-means", "Bayes", "K-cestný rozhodovací strom", "Tree Pruning"]
 used_method: StringVar = StringVar()
 used_method.set(method_type_list[0])
 method_label: Label = Label(root, text='Výber metódy', font=('helvetica', 11, 'bold'))
@@ -67,6 +67,8 @@ def start_clustering() -> None:
         bayes_method_window()
     elif used_method.get() == method_type_list[3]:
         k_way_tree_method_window()
+    elif used_method.get() == method_type_list[4]:
+        messagebox.showinfo('Error', ' DO TO  \n ¯\_(o_o)_/¯ ')
 
 
 def k_means_method_window() -> None:
